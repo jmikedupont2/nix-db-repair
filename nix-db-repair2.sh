@@ -37,7 +37,7 @@ extract_hash() {
 while true; do
 	echo going to repair
     # Run nix-store --verify --repair and capture stderr while discarding stdout
-    error_output=$(/nix/store/j6k7vmkpcm26d6m78nfpcrswxlfgdn9q-nix-2.33.1/bin/nix-store --verify --repair 2>&1 >/dev/null)
+    error_output=$(/nix/store/j6k7vmkpcm26d6m78nfpcrswxlfgdn9q-nix-2.33.1/bin/nix-collect-garbage 2>&1 >/dev/null)
 
     # Check if the error output is empty (meaning no errors occurred)
     if [ -z "$error_output" ]; then
@@ -66,7 +66,7 @@ while true; do
             # Avoid reprocessing the same hash
             if [ "$HASH" == "$PREV_HASH" ]; then
                 echo "Loop detected with hash $HASH. Exiting."
-                exit 1
+                #exit 1
             fi
             # Run the cleanup script
             if [ -x "$CLEANUP_SCRIPT" ]; then
@@ -75,19 +75,20 @@ while true; do
                 cleanup_exit_code=$?
                 if [ $cleanup_exit_code -ne 0 ]; then
                     echo "Cleanup script failed with exit code $cleanup_exit_code"
-                    exit $cleanup_exit_code
+                    #exit $cleanup_exit_code
                 fi
             else
                 echo "Error: Cleanup script not found or not executable: $CLEANUP_SCRIPT"
-                exit 1
+                #exit 1
             fi
         else
             echo "Failed to extract HASH from error message"
-            exit 1
+            #exit 1
         fi
     done <<<"$error_output"
 
-    if $found_paths; then break; fi
+    echo "Found paths $found_paths"
+    #if $found_paths; then break; fi
 done
 
 echo "All 'nix-store --verify --repair' operations completed."
